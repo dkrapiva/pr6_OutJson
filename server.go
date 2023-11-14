@@ -33,7 +33,8 @@ func filesView(rw http.ResponseWriter, r *http.Request) {
 	sortValue := r.URL.Query().Get("sortValue")
 
 	// Кодируем массив структур в формат JSON
-	json_data, err := json.Marshal(getFileInfo(root, sortValue))
+	data := getFileInfo(root, sortValue)
+	json_data, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println("Не удалось преобразовать структуру в json")
 		os.Exit(6)
