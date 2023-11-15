@@ -31,25 +31,33 @@ func getFileInfo(root string, sortValue string) []structFile {
 		fmt.Println("Не удалось считать директорию: ", root)
 		os.Exit(1)
 	}
-
+	var mutex sync.Mutex
 	var wg sync.WaitGroup
 	wg.Add(len(files))
 	// Записываем информацию о файлах и директориях в map
 	for _, file := range files {
-		go func(file fs.FileInfo) error {
+		go func(file fs.FileInfo, mutex *sync.Mutex) error {
 			defer wg.Done()
+
 			if file.IsDir() {
 				dirSize, err := getDirSize(root + "/" + file.Name())
 				if err != nil {
 					fmt.Println("Не удалось получить размер директории: ", root+"/"+file.Name())
 					return err
 				}
+				mutex.Lock()
 				mapDirsAndSizes[file] = dirSize
+				mutex.Unlock()
 			} else {
+				mutex.Lock()
 				mapDirsAndSizes[file] = int(file.Size())
+				mutex.Unlock()
 			}
+			mutex.Lock()
+			mapDirsAndSizes[file] = int(file.Size())
+			mutex.Unlock()
 			return nil
-		}(file)
+		}(file, &mutex)
 	}
 	wg.Wait()
 

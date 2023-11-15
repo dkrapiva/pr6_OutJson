@@ -3,25 +3,29 @@
     <head>
         <link href ="/static/style.css" rel = "stylesheet"> 
         <meta charset ="utf-8">
-        <script src="/static/script.js"></script>
     </head>
     <body>
         <div>
             <table id = "dirtable">
-                <caption> Файлы из директории Х </caption>
-                    <tr> 
-                        <th> Тип файла</th>
-                        <th> Имя файла </th>
-                        <th> Размер файла </th>
-                    </tr> 
+                <thead>
+                    <caption> Файлы из директории</caption>
+                        <tr> 
+                            <th> Тип файла</th>
+                            <th> Имя файла </th>
+                            <th> Размер файла </th>
+                        </tr> 
+                </thead>
+                <tbody id="tbd"></tbody>
             </table>
         </div>
 
         <div>
-            <form>
-                <input class="button" type = "button" value = "Сортировать по возрастанию">
-                <input class="button" type = "button" value = "Сортировать по убыванию">
+            <form id = "btns">
+                <input id="backbtn" class="button" type = "button" value = "Назад">
+                <input id="ASCbtn" class="button" type = "button" value = "Сортировать по возрастанию">
+                <input id="DESCbtn" class="button" type = "button" value = "Сортировать по убыванию">
             </form>
         </div>
+        <script src="/static/script.js"></script>
     </body>
     </html>
