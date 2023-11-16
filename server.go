@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,16 +16,17 @@ func main() {
 	http.HandleFunc("/dir", getJsonData)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))))
 
-	err := http.ListenAndServe(":8181", nil)
+	portNumber := 8181
+	//fmt.Printf("Сервер запущен на порту: %d\n", portNumber)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", portNumber), nil)
 	if err != nil {
-		fmt.Println("Не удалось подключить localhost")
+		log.Println("Не удалось подключить localhost")
 		os.Exit(1)
 	}
-
 	os.Exit(0)
 }
 
-//getJsonData(): функция, обрабатывающая запрос
+// getJsonData(): функция, обрабатывающая запрос
 // Выводит JSON на html страницу
 func getJsonData(rw http.ResponseWriter, r *http.Request) {
 
@@ -32,10 +34,25 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Set("Content-Type", "application/json")
 	root := r.URL.Query().Get("root")
+
+	if root == "" {
+		log.Println("Не задана директория")
+		return
+	}
+
 	sortValue := r.URL.Query().Get("sortValue")
+	if sortValue == "" {
+		log.Println("Не задан параметр сортировки")
+		return
+	}
 
 	// Кодируем массив структур в формат JSON
-	getJsonDataErr.Data = getFilesInfo(root, sortValue)
+	var err error
+	getJsonDataErr.Data, err = getFilesInfo(root, sortValue)
+	if err != nil {
+		log.Println("Не удалось получить директорию: ", root)
+		return
+	}
 	jsonData, err := json.Marshal(getJsonDataErr.Data)
 	if err != nil {
 		getJsonDataErr.Status = 1
@@ -51,19 +68,19 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//hadlerView(): функция, обрабатывающая запрос
+// handlerView(): функция, обрабатывающая запрос
 // Отображает html файл с таблицей
 func handlerView(rw http.ResponseWriter, r *http.Request) {
-	path := filepath.Join("static", "DirView.html")
+	path := filepath.Join("static", "index.html")
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
-		fmt.Println("Не удалось получить код страницы из файла:", path)
+		log.Println("Не удалось получить код страницы из файла:", path)
 		return
 	}
 
 	err = tmpl.Execute(rw, nil)
 	if err != nil {
-		fmt.Println("Не удалось сгенерировать html-разметку")
+		log.Println("Не удалось сгенерировать html-разметку")
 		return
 	}
 }

@@ -1,18 +1,20 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"log"
 	"sort"
 	"sync"
 )
 
 // Структура, хранящая тип, имя и размер файлов и директорий
 type structFile struct {
-	FileType string
-	Name     string
-	Size     string
+	FileType string `json:"file_type"`
+	Name     string `json:"name"`
+	Size     string `json:"size"`
 }
 
 // Структура для обработки ошибок
@@ -22,19 +24,21 @@ type Response struct {
 	Data      interface{}
 }
 
-func getFilesInfo(root string, sortValue string) []structFile {
+func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 	// Создаем и инициализируем map файлов и их размеров
 	mapDirsAndSizes := make(map[fs.FileInfo]int)
 
 	// Проверяем параметры на корректность
 	if (sortValue != "ASC") && (sortValue != "DESC") {
-		fmt.Println("Задан некорректный параметр сортировки")
-		return nil
+		log.Println("Задан некорректный параметр сортировки")
+		var err = errors.New("Задан некорректный параметр сортировки")
+		return nil, err
 	}
 	files, dirErr := ioutil.ReadDir(root)
 	if dirErr != nil {
 		fmt.Println("Не удалось считать директорию: ", root)
-		return nil
+		var err = errors.New("Задан некорректный параметр сортировки")
+		return nil, err
 	}
 	var valueOfDirSizes int
 	var mutex sync.Mutex
@@ -47,7 +51,7 @@ func getFilesInfo(root string, sortValue string) []structFile {
 			if file.IsDir() {
 				dirSize, err := getDirSize(root + "/" + file.Name())
 				if err != nil {
-					fmt.Println("Не удалось получить размер директории: ", root+"/"+file.Name())
+					log.Println("Не удалось получить размер директории: ", root+"/"+file.Name())
 					return err
 				}
 				valueOfDirSizes = dirSize
@@ -68,7 +72,7 @@ func getFilesInfo(root string, sortValue string) []structFile {
 	// Создаем массив структур с типом, именем и размером файлов
 	structofFiles := toStruct(keys, mapDirsAndSizes)
 
-	return structofFiles
+	return structofFiles, nil
 }
 
 // getDirSize(): рекурсивно вычисляет размер папок

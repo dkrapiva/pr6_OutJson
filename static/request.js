@@ -17,7 +17,7 @@ export function getRequest(root, sortValue) {
 // callback(): вызывает функцию createTable после ответа от сервера
 function callback(xhr) {
     var responseObj = xhr.response;
-    var fields = ["FileType", "Name", "Size"];
+    var fields = ["file_type", "name", "size"];
     var tbody = document.querySelector('#tbd');
     createTable(tbody, responseObj, fields);
 }
