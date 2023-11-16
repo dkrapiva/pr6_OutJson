@@ -12,7 +12,7 @@ import (
 func main() {
 
 	http.HandleFunc("/", handlerView)
-	http.HandleFunc("/dir", filesView)
+	http.HandleFunc("/dir", getJsonData)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))))
 
 	err := http.ListenAndServe(":8181", nil)
@@ -24,22 +24,31 @@ func main() {
 	os.Exit(0)
 }
 
-//filesView(): функция, обрабатывающая запрос
+//getJsonData(): функция, обрабатывающая запрос
 // Выводит JSON на html страницу
-func filesView(rw http.ResponseWriter, r *http.Request) {
+func getJsonData(rw http.ResponseWriter, r *http.Request) {
+
+	var getJsonDataErr, writeJsonDataErr Response
 
 	rw.Header().Set("Content-Type", "application/json")
 	root := r.URL.Query().Get("root")
 	sortValue := r.URL.Query().Get("sortValue")
 
 	// Кодируем массив структур в формат JSON
-	data := getFileInfo(root, sortValue)
-	json_data, err := json.Marshal(data)
+	getJsonDataErr.Data = getFilesInfo(root, sortValue)
+	jsonData, err := json.Marshal(getJsonDataErr.Data)
 	if err != nil {
-		fmt.Println("Не удалось преобразовать структуру в json")
-		os.Exit(6)
+		getJsonDataErr.Status = 1
+		getJsonDataErr.ErrorText = "Не удалось преобразовать структуру в json"
+		getJsonDataErr.Data = nil
+		return
 	}
-	rw.Write(json_data)
+	_, err = rw.Write(jsonData)
+	if err != nil {
+		writeJsonDataErr.Status = 1
+		writeJsonDataErr.ErrorText = "Не удалось записать json данные"
+		return
+	}
 }
 
 //hadlerView(): функция, обрабатывающая запрос

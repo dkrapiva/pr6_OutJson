@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
-	"os"
 	"sort"
 	"sync"
 )
@@ -16,21 +15,28 @@ type structFile struct {
 	Size     string
 }
 
-func getFileInfo(root string, sortValue string) []structFile {
+// Структура для обработки ошибок
+type Response struct {
+	Status    int64
+	ErrorText string
+	Data      interface{}
+}
+
+func getFilesInfo(root string, sortValue string) []structFile {
 	// Создаем и инициализируем map файлов и их размеров
-	var mapDirsAndSizes map[fs.FileInfo]int
-	mapDirsAndSizes = make(map[fs.FileInfo]int)
+	mapDirsAndSizes := make(map[fs.FileInfo]int)
 
 	// Проверяем параметры на корректность
 	if (sortValue != "ASC") && (sortValue != "DESC") {
 		fmt.Println("Задан некорректный параметр сортировки")
-		os.Exit(123)
+		return nil
 	}
 	files, dirErr := ioutil.ReadDir(root)
 	if dirErr != nil {
 		fmt.Println("Не удалось считать директорию: ", root)
-		os.Exit(1)
+		return nil
 	}
+	var valueOfDirSizes int
 	var mutex sync.Mutex
 	var wg sync.WaitGroup
 	wg.Add(len(files))
@@ -38,23 +44,18 @@ func getFileInfo(root string, sortValue string) []structFile {
 	for _, file := range files {
 		go func(file fs.FileInfo, mutex *sync.Mutex) error {
 			defer wg.Done()
-
 			if file.IsDir() {
 				dirSize, err := getDirSize(root + "/" + file.Name())
 				if err != nil {
 					fmt.Println("Не удалось получить размер директории: ", root+"/"+file.Name())
 					return err
 				}
-				mutex.Lock()
-				mapDirsAndSizes[file] = dirSize
-				mutex.Unlock()
+				valueOfDirSizes = dirSize
 			} else {
-				mutex.Lock()
-				mapDirsAndSizes[file] = int(file.Size())
-				mutex.Unlock()
+				valueOfDirSizes = int(file.Size())
 			}
 			mutex.Lock()
-			mapDirsAndSizes[file] = int(file.Size())
+			mapDirsAndSizes[file] = valueOfDirSizes
 			mutex.Unlock()
 			return nil
 		}(file, &mutex)
@@ -131,7 +132,6 @@ func toStruct(files []fs.FileInfo, m map[fs.FileInfo]int) []structFile {
 
 	keyType := ""
 	for _, k := range files {
-
 		if k.IsDir() {
 			keyType = "d"
 		} else {
