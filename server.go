@@ -17,7 +17,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./static/"))))
 
 	portNumber := 8181
-	//fmt.Printf("Сервер запущен на порту: %d\n", portNumber)
+	fmt.Printf("Сервер запущен на порту: %d\n", portNumber)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", portNumber), nil)
 	if err != nil {
 		log.Println("Не удалось подключить localhost")
@@ -30,40 +30,38 @@ func main() {
 // Выводит JSON на html страницу
 func getJsonData(rw http.ResponseWriter, r *http.Request) {
 
-	var getJsonDataErr, writeJsonDataErr Response
+	var paramsNames = Params{root: "root", sortValue: "sortValue"}
 
 	rw.Header().Set("Content-Type", "application/json")
-	root := r.URL.Query().Get("root")
+	root := r.URL.Query().Get(paramsNames.root)
 
 	if root == "" {
 		log.Println("Не задана директория")
 		return
 	}
 
-	sortValue := r.URL.Query().Get("sortValue")
+	sortValue := r.URL.Query().Get(paramsNames.sortValue)
 	if sortValue == "" {
 		log.Println("Не задан параметр сортировки")
 		return
 	}
 
 	// Кодируем массив структур в формат JSON
-	var err error
-	getJsonDataErr.Data, err = getFilesInfo(root, sortValue)
+	getJsonData, err := getFilesInfo(root, sortValue)
 	if err != nil {
 		log.Println("Не удалось получить директорию: ", root)
 		return
 	}
-	jsonData, err := json.Marshal(getJsonDataErr.Data)
+
+	jsonData, err := json.Marshal(getJsonData)
 	if err != nil {
-		getJsonDataErr.Status = 1
-		getJsonDataErr.ErrorText = "Не удалось преобразовать структуру в json"
-		getJsonDataErr.Data = nil
+		log.Println("Не удалось сериализировать данные")
 		return
 	}
 	_, err = rw.Write(jsonData)
 	if err != nil {
-		writeJsonDataErr.Status = 1
-		writeJsonDataErr.ErrorText = "Не удалось записать json данные"
+		log.Println("Не удалось записать json данные")
+		rw.Write([]byte("Не удалось отобразить данные"))
 		return
 	}
 }

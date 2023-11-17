@@ -10,6 +10,11 @@ import (
 	"sync"
 )
 
+type Params struct {
+	root      string
+	sortValue string
+}
+
 // Структура, хранящая тип, имя и размер файлов и директорий
 type structFile struct {
 	FileType string `json:"file_type"`
@@ -17,17 +22,27 @@ type structFile struct {
 	Size     string `json:"size"`
 }
 
-// Структура для обработки ошибок
-type Response struct {
-	Status    int64
-	ErrorText string
-	Data      interface{}
+// Структура для реализации мьютекса
+type mutexStruct struct {
+	sync.Mutex
+	mapFileInfo map[fs.FileInfo]int
+}
+
+func (mu *mutexStruct) set(file fs.FileInfo, value int) {
+	mu.Lock()
+	defer mu.Unlock()
+	mu.mapFileInfo[file] = value
+}
+
+func New() *mutexStruct {
+	return &mutexStruct{
+		mapFileInfo: make(map[fs.FileInfo]int),
+	}
 }
 
 func getFilesInfo(root string, sortValue string) ([]structFile, error) {
-	// Создаем и инициализируем map файлов и их размеров
-	mapDirsAndSizes := make(map[fs.FileInfo]int)
-
+	// Создаем структуру с инициализированным map
+	var mapDirsAndSizes = New()
 	// Проверяем параметры на корректность
 	if (sortValue != "ASC") && (sortValue != "DESC") {
 		log.Println("Задан некорректный параметр сортировки")
@@ -41,12 +56,11 @@ func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 		return nil, err
 	}
 	var valueOfDirSizes int
-	var mutex sync.Mutex
 	var wg sync.WaitGroup
 	wg.Add(len(files))
 	// Записываем информацию о файлах и директориях в map
 	for _, file := range files {
-		go func(file fs.FileInfo, mutex *sync.Mutex) error {
+		go func(file fs.FileInfo) error {
 			defer wg.Done()
 			if file.IsDir() {
 				dirSize, err := getDirSize(root + "/" + file.Name())
@@ -58,19 +72,17 @@ func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 			} else {
 				valueOfDirSizes = int(file.Size())
 			}
-			mutex.Lock()
-			mapDirsAndSizes[file] = valueOfDirSizes
-			mutex.Unlock()
+			mapDirsAndSizes.set(file, valueOfDirSizes)
 			return nil
-		}(file, &mutex)
+		}(file)
 	}
 	wg.Wait()
 
 	// Вызываем функцию сортировки по параметру sortValue
-	keys := sortMapValues(mapDirsAndSizes, sortValue)
+	keys := sortMapValues(mapDirsAndSizes.mapFileInfo, sortValue)
 
 	// Создаем массив структур с типом, именем и размером файлов
-	structofFiles := toStruct(keys, mapDirsAndSizes)
+	structofFiles := toStruct(keys, mapDirsAndSizes.mapFileInfo)
 
 	return structofFiles, nil
 }
