@@ -1,35 +1,32 @@
 import { Loader } from "../View/loader";
-export class File_Model{
-    
-    loader: Loader;
-    callback;
-    constructor (callback: Function, loader: Loader) {
-        this.callback = callback;
-        this.loader = loader;
-    }
+
+export class FileModel{
+
     // getRequest(): посылает get-запрос для получения информации о директориях 
     getRequest(
-        root_obj: {
+        rootObj: {
             root: string, 
-            add_folder: Function, 
-            remove_folder: Function
+            addFolder: Function, 
+            removeFolder: Function
         },  
         sortValue: string, 
+        callback: Function
     ) {
-        this.loader.show();
+        Loader.show();
         let xhr = new XMLHttpRequest();
         let host = window.location.href;
-        let url = host + `dir?root=${root_obj.root}&sortValue=${sortValue}`;
+        let url = host + `dir?root=${rootObj.root}&sortValue=${sortValue}`;
         xhr.open('GET', url);
         xhr.responseType = 'json';
     
         xhr.onerror = () => {
-            this.loader.hide();
+            Loader.hide();
             alert(`Сервер не отвечает ${xhr.status}: ${xhr.statusText}`);
         }
 
-        xhr.onload = () => this.callback(xhr, root_obj, sortValue);
-
+        xhr.onload = () => {
+            callback(xhr, rootObj, sortValue);
+        }
         xhr.send();
     }
 

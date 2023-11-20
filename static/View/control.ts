@@ -1,4 +1,5 @@
-import { File_Model } from "../Model/file_model";
+import { FileModel } from "../Model/file_model";
+import { Table } from "./table";
 
 export class Control {
     asc = "ASC";
@@ -7,19 +8,19 @@ export class Control {
     btnASC = document.querySelector("#ASCbtn");
     btnDESC = document.querySelector("#DESCbtn");
     btn = document.querySelector("#backbtn");
-    callback;
-    file_model;
+    fileModel;
+    table;
 
-    constructor (callback: Function, file_model: File_Model) {
-        this.callback = callback;
-        this.file_model = file_model;
+    constructor (fileModel: FileModel, table: Table) {
+        this.fileModel = fileModel;
+        this.table = table;
     }
 
     init(
-        root_obj: {
+        rootObj: {
             root: string, 
-            add_folder: Function, 
-            remove_folder: Function,
+            addFolder: Function, 
+            removeFolder: Function,
         },
         sortValue: string,
     ) {
@@ -28,24 +29,24 @@ export class Control {
         this.btnASC!.addEventListener("click", () => {
             sortValue = this.asc;
             this.tbody!.innerHTML = "";
-            this.file_model.getRequest(root_obj, sortValue);
+            this.fileModel.getRequest(rootObj, sortValue, this.table.callback);
         });
 
         // По убыванию
         this.btnDESC!.addEventListener("click", () => {
             sortValue = this.desc;
             this.tbody!.innerHTML = "";
-            this.file_model.getRequest(root_obj, sortValue);
+            this.fileModel.getRequest(rootObj, sortValue, this.table.callback);
         });
 
         //Обработка нажатия кнопки назад 
         this.btn!.addEventListener("click", () => {
-            if (root_obj.root == "/") {
+            if (rootObj.root == "/") {
                 alert("Вы в корневой директории!");
             } else {
                 this.tbody!.innerHTML = '';
-                root_obj.remove_folder();
-                this.file_model.getRequest(root_obj, sortValue);
+                rootObj.removeFolder();
+                this.fileModel.getRequest(rootObj, sortValue, this.table.callback);
             }
         });
     }   

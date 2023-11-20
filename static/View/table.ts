@@ -1,53 +1,63 @@
-import { File_Model } from "../Model/file_model";
+import { FileModel } from "../Model/file_model";
 import { Loader } from "./loader";
+
+type File = {
+    file_type: string,
+    name: string;
+    size: string;
+}
+type FileListResponse = File[];
 
 export class Table{
     // render(): создание и заполнение таблицы данных из директорий 
     tbody = document.querySelector('#tbody_id');
-    callback;
-    file_model;
+    rootObj;
+    fileModel;
     sortValue;
-    constructor (callback: Function, file_model: File_Model, sortValue: string) {
-        this.callback = callback;
-        this.file_model = file_model;
-        this.sortValue = sortValue;
-    }
-    fields = ["file_type", "name", "size"];
-
-    render(
-        responseObj: any, 
-        root_obj: {
+    constructor (
+        fileModel: FileModel, 
+        sortValue: string, 
+        rootObj: {
             root: string, 
-            add_folder: Function, 
-            remove_folder: Function
+            addFolder: Function, 
+            removeFolder: Function
         }, 
-    ) { 
+    ){ 
+        this.fileModel = fileModel;
+        this.sortValue = sortValue;
+        this.rootObj = rootObj;
+    }
+
+    render(responseObj: FileListResponse) { 
+
         for (let item of responseObj){
             let tr = document.createElement("tr");
-            for (let field of this.fields) {
+            let fields = [item.file_type, item.name, item.size]
+            for (let field of fields) {
                 let td = document.createElement("td");
-                let folder = item['name'];  
-                td.innerHTML = item[field]; 
-                if (item['file_type'] == 'd') { 
+                let folder = item.name;  
+                td.innerHTML = field; 
+                if (item.file_type == 'd') { 
                     td.addEventListener("click", () => {
                         this.tbody!.innerHTML = '';
-                        root_obj.add_folder(folder + '/');
-                        this.file_model.getRequest(root_obj, this.sortValue);
+                        this.rootObj.addFolder(folder + '/');
+                        this.fileModel.getRequest(this.rootObj, this.sortValue, this.callback);
                     });
                 }
                 tr.appendChild(td);
             }
             this.tbody!.appendChild(tr);
         }
-}
+    }
 
-    init(
-        root_obj: {
-            root: string,
-            add_folder: Function, 
-            remove_folder: Function
-        },  
-    ) {
-        this.file_model.getRequest(root_obj, this.sortValue);
+    // callback(): вызывает функцию render после ответа от сервера
+    callback = (xhr: XMLHttpRequest) => {
+        let responseObj = xhr.response;
+        this.render(responseObj); 
+        Loader.hide();
+    }
+
+    init(rootObj: {root: string, addFolder: Function, removeFolder: Function}) {
+            this.fileModel.getRequest(rootObj, this.sortValue, this.callback);
     }
 }
