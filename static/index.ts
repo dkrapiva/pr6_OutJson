@@ -23,7 +23,7 @@ function callback(xhr: XMLHttpRequest,
 }
 
 // Объявление начальных значений параметров
-const root_dir: string = 'P:/',
+const root_dir: string = '/',
       asc = 'ASC',
       desc = 'DESC';
 let sortValue = desc;
