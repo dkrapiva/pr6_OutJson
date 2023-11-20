@@ -19,6 +19,10 @@ function callback(xhr: XMLHttpRequest,
 
 // Объявление начальных значений параметров
 const root_dir: string = '/',
+<<<<<<< HEAD
+=======
+      asc = 'ASC',
+>>>>>>> e1bdd4bb55459a4087c783dac44fb1461c583d9a
       desc = 'DESC';
 
 let sortValue = desc;
