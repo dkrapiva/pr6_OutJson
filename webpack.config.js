@@ -29,7 +29,7 @@ module.exports = {
     plugins: [
         // Используем плагин, автоматически генерирующий HTML-файл
         new HtmlWebpackPlugin({
-            template: './static/main.html' 
+            template: './static/index.html' 
         }),
     ],
     
