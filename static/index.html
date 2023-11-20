@@ -2,15 +2,13 @@
 <html>
     <head>
         <link href ="/static/style.css" rel = "stylesheet"> 
-        <link href ="/static/preloader.css" rel = "stylesheet"> 
+        <!-- <link href ="/static/View/preloader.css" rel = "stylesheet"> 
+        <script type="module" src = "/static/View/loader.js"> </script> -->
         <meta charset ="utf-8">
-        <script type="module" src = "/static/preloader.js"> </script>
-
-    </head>
     <body>      
-        <div id='preloader'>
-            <img src="/static/preloader.gif" alt="preloader">
-        </div>
+        <!-- <div id='loader'>
+            <img src="/static/View/preloader.gif" alt="preloader">
+        </div> -->
         
         <div>
             <form id = "btns">
@@ -22,19 +20,20 @@
         <div>
             <table id = "dirtable">
                 <thead>
-                    <caption> Файлы из директории</caption>
                         <tr> 
                             <th> Тип файла</th>
                             <th> Имя файла </th>
                             <th> Размер файла </th>
                         </tr> 
                 </thead>
-                <tbody id="tbd"></tbody>
+                <tbody id="tbody_id"></tbody>
             </table>
         </div>
 
-        <script type="module" src = "/static/request.js"></script>
-        <script type="module" src="/static/script.js"></script>
+        <script type="module" src = "/static/index.js"></script>
+        <script type="module" src="/static/View/control.js"></script>
+        <script type="module" src="/static/View/table.js"></script>
+        <script type="module" src="/static/Model/file_model.js"></script>
         
     </body>
-    </html>
+  </html>

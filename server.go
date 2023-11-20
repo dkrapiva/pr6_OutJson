@@ -34,15 +34,16 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Set("Content-Type", "application/json")
 	root := r.URL.Query().Get(paramsNames.root)
-
 	if root == "" {
 		log.Println("Не задана директория")
+		rw.Write([]byte("Не задана директория"))
 		return
 	}
 
 	sortValue := r.URL.Query().Get(paramsNames.sortValue)
 	if sortValue == "" {
 		log.Println("Не задан параметр сортировки")
+		rw.Write([]byte("Не задан параметр сортировки"))
 		return
 	}
 
@@ -50,12 +51,14 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 	getJsonData, err := getFilesInfo(root, sortValue)
 	if err != nil {
 		log.Println("Не удалось получить директорию: ", root)
+		rw.Write([]byte("Не удалось получить директорию"))
 		return
 	}
 
 	jsonData, err := json.Marshal(getJsonData)
 	if err != nil {
 		log.Println("Не удалось сериализировать данные")
+		rw.Write([]byte("Не удалось сериализировать данные"))
 		return
 	}
 	_, err = rw.Write(jsonData)
@@ -69,7 +72,7 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 // handlerView(): функция, обрабатывающая запрос
 // Отображает html файл с таблицей
 func handlerView(rw http.ResponseWriter, r *http.Request) {
-	path := filepath.Join("static", "index.html")
+	path := filepath.Join("static", "main.html")
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		log.Println("Не удалось получить код страницы из файла:", path)

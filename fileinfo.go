@@ -10,41 +10,16 @@ import (
 	"sync"
 )
 
-type Params struct {
-	root      string
-	sortValue string
-}
+const (
+	desc = "DESC"
+	asc  = "ASC"
+)
 
-// Структура, хранящая тип, имя и размер файлов и директорий
-type structFile struct {
-	FileType string `json:"file_type"`
-	Name     string `json:"name"`
-	Size     string `json:"size"`
-}
-
-// Структура для реализации мьютекса
-type mutexStruct struct {
-	sync.Mutex
-	mapFileInfo map[fs.FileInfo]int
-}
-
-func (mu *mutexStruct) set(file fs.FileInfo, value int) {
-	mu.Lock()
-	defer mu.Unlock()
-	mu.mapFileInfo[file] = value
-}
-
-func New() *mutexStruct {
-	return &mutexStruct{
-		mapFileInfo: make(map[fs.FileInfo]int),
-	}
-}
-
-func getFilesInfo(root string, sortValue string) ([]structFile, error) {
+func getFilesInfo(root string, sortValue string) ([]File, error) {
 	// Создаем структуру с инициализированным map
 	var mapDirsAndSizes = New()
 	// Проверяем параметры на корректность
-	if (sortValue != "ASC") && (sortValue != "DESC") {
+	if (sortValue != asc) && (sortValue != desc) {
 		log.Println("Задан некорректный параметр сортировки")
 		var err = errors.New("Задан некорректный параметр сортировки")
 		return nil, err
@@ -52,7 +27,7 @@ func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 	files, dirErr := ioutil.ReadDir(root)
 	if dirErr != nil {
 		fmt.Println("Не удалось считать директорию: ", root)
-		var err = errors.New("Задан некорректный параметр сортировки")
+		var err = errors.New("Не удалось считать директорию")
 		return nil, err
 	}
 	var valueOfDirSizes int
@@ -60,7 +35,7 @@ func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 	wg.Add(len(files))
 	// Записываем информацию о файлах и директориях в map
 	for _, file := range files {
-		go func(file fs.FileInfo) error {
+		go func(file fs.FileInfo, wg *sync.WaitGroup) error {
 			defer wg.Done()
 			if file.IsDir() {
 				dirSize, err := getDirSize(root + "/" + file.Name())
@@ -74,7 +49,7 @@ func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 			}
 			mapDirsAndSizes.set(file, valueOfDirSizes)
 			return nil
-		}(file)
+		}(file, &wg)
 	}
 	wg.Wait()
 
@@ -82,9 +57,9 @@ func getFilesInfo(root string, sortValue string) ([]structFile, error) {
 	keys := sortMapValues(mapDirsAndSizes.mapFileInfo, sortValue)
 
 	// Создаем массив структур с типом, именем и размером файлов
-	structofFiles := toStruct(keys, mapDirsAndSizes.mapFileInfo)
+	filesList := toStruct(keys, mapDirsAndSizes.mapFileInfo)
 
-	return structofFiles, nil
+	return filesList, nil
 }
 
 // getDirSize(): рекурсивно вычисляет размер папок
@@ -132,7 +107,7 @@ func sortMapValues(m map[fs.FileInfo]int, sortValue string) []fs.FileInfo {
 		keys = append(keys, key)
 	}
 	sort.SliceStable(keys, func(i, j int) bool {
-		if sortValue == "ASC" {
+		if sortValue == asc {
 			return m[keys[i]] < m[keys[j]]
 		} else {
 			return m[keys[i]] > m[keys[j]]
@@ -142,9 +117,9 @@ func sortMapValues(m map[fs.FileInfo]int, sortValue string) []fs.FileInfo {
 }
 
 // toStruct(): возвращает массив структур с типом, именем и размером файлов
-func toStruct(files []fs.FileInfo, m map[fs.FileInfo]int) []structFile {
+func toStruct(files []fs.FileInfo, m map[fs.FileInfo]int) []File {
 
-	structofFiles := []structFile{}
+	filesList := []File{}
 
 	keyType := ""
 	for _, k := range files {
@@ -154,13 +129,13 @@ func toStruct(files []fs.FileInfo, m map[fs.FileInfo]int) []structFile {
 			keyType = "f"
 		}
 
-		oneFile := structFile{
+		oneFile := File{
 			FileType: keyType,
 			Name:     k.Name(),
 			Size:     formSize(m[k]),
 		}
 
-		structofFiles = append(structofFiles, oneFile)
+		filesList = append(filesList, oneFile)
 	}
-	return structofFiles
+	return filesList
 }
