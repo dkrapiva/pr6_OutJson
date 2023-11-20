@@ -5,6 +5,10 @@ import { Control } from "./View/control";
 
 // Объявление начальных значений параметров
 const root_dir: string = '/',
+<<<<<<< HEAD
+=======
+      asc = 'ASC',
+>>>>>>> e7a4abf50c4095081911467c3869fe05550f1769
       desc = 'DESC';
 
 let sortValue = desc;
