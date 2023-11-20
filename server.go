@@ -72,7 +72,7 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 // handlerView(): функция, обрабатывающая запрос
 // Отображает html файл с таблицей
 func handlerView(rw http.ResponseWriter, r *http.Request) {
-	path := filepath.Join("static", "index.html")
+	path := filepath.Join("static", "dist", "index.html")
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		log.Println("Не удалось получить код страницы из файла:", path)

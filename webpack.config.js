@@ -30,7 +30,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'static', 'dist'), // Путь для выходного файла сборки
-        filename: 'bundle.[contenthash].js', // Имя выходного файла сборки 
+        filename: './static/dist/bundle.[contenthash].js', // Имя выходного файла сборки 
     },  
 
     plugins: [

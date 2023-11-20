@@ -4,14 +4,12 @@ import { Control } from "./View/control";
 
 
 // Объявление начальных значений параметров
-const root_dir: string = '/',
-<<<<<<< HEAD
-=======
+enum Params {
       asc = 'ASC',
->>>>>>> e7a4abf50c4095081911467c3869fe05550f1769
-      desc = 'DESC';
+      desc = 'DESC'}
 
-let sortValue = desc;
+let root_dir: string = '/';
+let sortValue = Params.desc;
 
 // Объявление объекта, у которого свойство root
 // будет меняться в зависимости от текущей директории 
