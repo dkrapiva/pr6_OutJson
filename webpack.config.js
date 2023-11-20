@@ -22,14 +22,14 @@ module.exports = {
     },
 
     output: {
-        path: path.resolve(__dirname, 'static'), // Путь для выходного файла сборки
-        filename: 'bundle.js', // Имя выходного файла сборки './static/bundle.js'
+        path: path.resolve(__dirname, 'static', 'dist'), // Путь для выходного файла сборки
+        filename: 'bundle.js', // Имя выходного файла сборки 
     },  
 
     plugins: [
         // Используем плагин, автоматически генерирующий HTML-файл
         new HtmlWebpackPlugin({
-            template: './static/main.html' 
+            template: './static/index.html' 
         }),
     ],
     

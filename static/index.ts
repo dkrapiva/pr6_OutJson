@@ -10,16 +10,12 @@ function callback(xhr: XMLHttpRequest,
                     add_folder: Function, 
                     remove_folder: Function,
                   }, 
-                  sortValue: string, 
-                  file_model: File_Model,
                 ) {
     let responseObj = xhr.response;
-    let fields = ["file_type", "name", "size"];
-    let tbody = document.querySelector('#tbody_id');
 
     //loader_hide();
 
-    table.render(tbody, responseObj, fields, root_obj, sortValue, file_model, callback); 
+    table.render(responseObj, root_obj); 
 }
 
 // Объявление начальных значений параметров
@@ -43,20 +39,14 @@ let root_obj = {
     }
 };
 
-// Элементы HTML страницы
-let tbody = document.querySelector('#tbody_id');
-let btnASC = document.querySelector("#ASCbtn");
-let btnDESC = document.querySelector("#DESCbtn");
-let btn = document.querySelector("#backbtn");
-
 // Инициализация объектов классов
-let table = new Table();
-let control = new Control(btnASC, tbody, btnDESC, btn);
 let loader = new Loader();
-let file_model = new File_Model();
-
+let file_model = new File_Model(callback);
+let table = new Table(callback, file_model, sortValue);
+let control = new Control(callback, file_model); 
 
 document.addEventListener('DOMContentLoaded', () => {
-    table.init(root_obj, sortValue, file_model, callback);
-    control.init(asc, desc, sortValue, root_obj, callback, file_model);
+
+    table.init(root_obj);
+    control.init(root_obj, sortValue);
 });

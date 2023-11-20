@@ -1,5 +1,8 @@
 export class File_Model{
-
+    callback;
+    constructor (callback: Function) {
+        this.callback = callback;
+    }
     // getRequest(): посылает get-запрос для получения информации о директориях 
     getRequest(
         root_obj: {
@@ -8,8 +11,6 @@ export class File_Model{
             remove_folder: Function
         },  
         sortValue: string, 
-        callback: Function, 
-        file_model: File_Model,
     ) {
         //loader_show();
         let xhr = new XMLHttpRequest();
@@ -23,7 +24,7 @@ export class File_Model{
             alert(`Сервер не отвечает ${xhr.status}: ${xhr.statusText}`);
         }
 
-        xhr.onload = () => callback(xhr, root_obj, sortValue, file_model);
+        xhr.onload = () => this.callback(xhr, root_obj, sortValue);
 
         xhr.send();
     }

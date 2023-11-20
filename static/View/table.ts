@@ -3,35 +3,42 @@ import { Loader } from "./loader";
 
 export class Table{
     // render(): создание и заполнение таблицы данных из директорий 
+    tbody = document.querySelector('#tbody_id');
+    callback;
+    file_model;
+    sortValue;
+    constructor (callback: Function, file_model: File_Model, sortValue: string) {
+        this.callback = callback;
+        this.file_model = file_model;
+        this.sortValue = sortValue;
+    }
+
+    fields = ["file_type", "name", "size"];
+
     render(
-        tbody: Element | null, 
         responseObj: any, 
-        fields: string[], 
         root_obj: {
             root: string, 
             add_folder: Function, 
             remove_folder: Function
         }, 
-        sortValue: string,
-        file_model: File_Model,
-        callback: Function,
     ) { 
         for (let item of responseObj){
             let tr = document.createElement("tr");
-            for (let field of fields) {
+            for (let field of this.fields) {
                 let td = document.createElement("td");
                 let folder = item['name'];  
                 td.innerHTML = item[field]; 
                 if (item['file_type'] == 'd') { 
                     td.addEventListener("click", () => {
-                        tbody!.innerHTML = '';
+                        this.tbody!.innerHTML = '';
                         root_obj.add_folder(folder + '/');
-                        file_model.getRequest(root_obj, sortValue, callback, file_model);
+                        this.file_model.getRequest(root_obj, this.sortValue);
                     });
                 }
                 tr.appendChild(td);
             }
-            tbody!.appendChild(tr);
+            this.tbody!.appendChild(tr);
         }
 }
 
@@ -41,10 +48,7 @@ export class Table{
             add_folder: Function, 
             remove_folder: Function
         },  
-        sortValue: string, 
-        file_model: File_Model, 
-        callback: Function,
     ) {
-        file_model.getRequest(root_obj, sortValue, callback, file_model);
+        this.file_model.getRequest(root_obj, this.sortValue);
     }
 }

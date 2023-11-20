@@ -1,49 +1,41 @@
 import { File_Model } from "../Model/file_model";
-import { Loader } from "./loader";
 
 export class Control {
-    btnASC;
-    tbody;
-    btnDESC;
-    btn;
+    asc = "ASC";
+    desc = "DESC"
+    tbody = document.querySelector('#tbody_id');
+    btnASC = document.querySelector("#ASCbtn");
+    btnDESC = document.querySelector("#DESCbtn");
+    btn = document.querySelector("#backbtn");
+    callback;
+    file_model;
 
-    constructor (
-                btnASC: Element | null,
-                tbody: Element | null,
-                btnDESC: Element | null,
-                btn: Element | null
-                ) {
-                    this.btnASC = btnASC;
-                    this.tbody = tbody;
-                    this.btnDESC = btnDESC;
-                    this.btn = btn;
-                }
+    constructor (callback: Function, file_model: File_Model) {
+        this.callback = callback;
+        this.file_model = file_model;
+    }
 
     init(
-        asc: string,
-        desc: string,
-        sortValue: string, 
         root_obj: {
             root: string, 
             add_folder: Function, 
             remove_folder: Function,
-        }, 
-        callback: Function, 
-        file_model: File_Model,
+        },
+        sortValue: string,
     ) {
         // Обработка нажатия кнопок сортировки 
         // По возрастанию
         this.btnASC!.addEventListener("click", () => {
-            sortValue = asc;
+            sortValue = this.asc;
             this.tbody!.innerHTML = "";
-            file_model.getRequest(root_obj, sortValue, callback, file_model);
+            this.file_model.getRequest(root_obj, sortValue);
         });
 
         // По убыванию
         this.btnDESC!.addEventListener("click", () => {
-            sortValue = desc;
+            sortValue = this.desc;
             this.tbody!.innerHTML = "";
-            file_model.getRequest(root_obj, sortValue, callback, file_model);
+            this.file_model.getRequest(root_obj, sortValue);
         });
 
         //Обработка нажатия кнопки назад 
@@ -53,7 +45,7 @@ export class Control {
             } else {
                 this.tbody!.innerHTML = '';
                 root_obj.remove_folder();
-                file_model.getRequest(root_obj, sortValue, callback, file_model);
+                this.file_model.getRequest(root_obj, sortValue);
             }
         });
     }   
