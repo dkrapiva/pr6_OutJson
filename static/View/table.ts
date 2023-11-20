@@ -12,7 +12,6 @@ export class Table{
         this.file_model = file_model;
         this.sortValue = sortValue;
     }
-
     fields = ["file_type", "name", "size"];
 
     render(

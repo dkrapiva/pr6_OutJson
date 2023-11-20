@@ -12,16 +12,15 @@ function callback(xhr: XMLHttpRequest,
                   }, 
                 ) {
     let responseObj = xhr.response;
-
-    //loader_hide();
-
     table.render(responseObj, root_obj); 
+
+    loader.hide();
 }
 
 // Объявление начальных значений параметров
 const root_dir: string = '/',
-      asc = 'ASC',
       desc = 'DESC';
+
 let sortValue = desc;
 
 // Объявление объекта, у которого свойство root
@@ -41,12 +40,11 @@ let root_obj = {
 
 // Инициализация объектов классов
 let loader = new Loader();
-let file_model = new File_Model(callback);
+let file_model = new File_Model(callback, loader);
 let table = new Table(callback, file_model, sortValue);
 let control = new Control(callback, file_model); 
 
 document.addEventListener('DOMContentLoaded', () => {
-
     table.init(root_obj);
     control.init(root_obj, sortValue);
 });
