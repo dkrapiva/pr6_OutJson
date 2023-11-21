@@ -6,7 +6,8 @@ import { Control } from "./View/control";
 // Объявление начальных значений параметров
 enum Params {
       asc = 'ASC',
-      desc = 'DESC'}
+      desc = 'DESC',
+    }
 
 let root_dir: string = '/';
 let sortValue = Params.desc;

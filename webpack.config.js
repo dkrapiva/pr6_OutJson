@@ -30,13 +30,14 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'static', 'dist'), // Путь для выходного файла сборки
-        filename: './static/dist/bundle.[contenthash].js', // Имя выходного файла сборки 
+        filename: 'bundle.[contenthash].js', // Имя выходного файла сборки 
     },  
 
     plugins: [
         // Используем плагин, автоматически генерирующий HTML-файл
         new HtmlWebpackPlugin({
-            template: './static/index.html' 
+            template: './static/index.html',
+            publicPath: '/static/dist'
         }),
     ],
 

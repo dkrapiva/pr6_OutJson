@@ -1,9 +1,13 @@
 import { FileModel } from "../Model/file_model";
 import { Table } from "./table";
 
+enum sortParams {
+    asc = "ASC",
+    desc = "DESC",
+}
+
 export class Control {
-    asc = "ASC";
-    desc = "DESC"
+
     tbody = document.querySelector('#tbody_id');
     btnASC = document.querySelector("#ASCbtn");
     btnDESC = document.querySelector("#DESCbtn");
@@ -27,14 +31,14 @@ export class Control {
         // Обработка нажатия кнопок сортировки 
         // По возрастанию
         this.btnASC!.addEventListener("click", () => {
-            sortValue = this.asc;
+            sortValue = sortParams.asc;
             this.tbody!.innerHTML = "";
             this.fileModel.getRequest(rootObj, sortValue, this.table.callback);
         });
 
         // По убыванию
         this.btnDESC!.addEventListener("click", () => {
-            sortValue = this.desc;
+            sortValue = sortParams.desc;
             this.tbody!.innerHTML = "";
             this.fileModel.getRequest(rootObj, sortValue, this.table.callback);
         });
