@@ -4,7 +4,7 @@ import { Loader } from "./loader";
 type File = {
     file_type: string,
     name: string;
-    size: string;
+    format_size: string;
 }
 type FileListResponse = File[];
 
@@ -32,7 +32,7 @@ export class Table{
 
         for (let item of responseObj){
             let tr = document.createElement("tr");
-            let fields = [item.file_type, item.name, item.size]
+            let fields = [item.file_type, item.name, item.format_size]
             for (let field of fields) {
                 let td = document.createElement("td");
                 let folder = item.name;  

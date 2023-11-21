@@ -130,9 +130,10 @@ func toStruct(files []fs.FileInfo, m map[fs.FileInfo]int) []File {
 		}
 
 		oneFile := File{
-			FileType: keyType,
-			Name:     k.Name(),
-			Size:     formSize(m[k]),
+			FileType:   keyType,
+			Name:       k.Name(),
+			FormatSize: formSize(m[k]),
+			Size:       m[k],
 		}
 
 		filesList = append(filesList, oneFile)

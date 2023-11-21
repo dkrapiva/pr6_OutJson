@@ -12,6 +12,7 @@ export class Control {
     btnASC = document.querySelector("#ASCbtn");
     btnDESC = document.querySelector("#DESCbtn");
     btn = document.querySelector("#backbtn");
+    statBtn = document.querySelector('#stat');
     fileModel;
     table;
 
@@ -53,5 +54,10 @@ export class Control {
                 this.fileModel.getRequest(rootObj, sortValue, this.table.callback);
             }
         });
+
+        this.statBtn!.addEventListener("click", () => {
+            window.open("http://localhost/set_stat.php");
+        })
+
     }   
 }

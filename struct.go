@@ -5,6 +5,21 @@ import (
 	"sync"
 )
 
+// Структура для отправки статистики
+type DirsStat struct {
+	root     string
+	dSize    string
+	loadTime string
+	cDate    string
+}
+
+// Структура для получения Json данных
+type Response struct {
+	Status    int
+	ErrorText string
+	Data      []byte
+}
+
 // Структура для параметров
 type Params struct {
 	root      string
@@ -13,9 +28,10 @@ type Params struct {
 
 // Структура, хранящая тип, имя и размер файлов и директорий
 type File struct {
-	FileType string `json:"file_type"`
-	Name     string `json:"name"`
-	Size     string `json:"size"`
+	FileType   string `json:"file_type"`
+	Name       string `json:"name"`
+	FormatSize string `json:"format_size"`
+	Size       int    `json:"-"`
 }
 
 // Структура для реализации мьютекса

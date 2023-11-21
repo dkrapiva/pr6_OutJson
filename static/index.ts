@@ -8,7 +8,6 @@ enum Params {
       asc = 'ASC',
       desc = 'DESC',
     }
-
 let root_dir: string = '/';
 let sortValue = Params.desc;
 

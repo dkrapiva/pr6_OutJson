@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func main() {
@@ -31,7 +33,7 @@ func main() {
 func getJsonData(rw http.ResponseWriter, r *http.Request) {
 
 	var paramsNames = Params{root: "root", sortValue: "sortValue"}
-
+	var jsonData = Response{Status: 0, ErrorText: "", Data: nil}
 	rw.Header().Set("Content-Type", "application/json")
 	root := r.URL.Query().Get(paramsNames.root)
 	if root == "" {
@@ -47,24 +49,50 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Инициализация структуры для статистики
+	var dirStat = DirsStat{
+		root:     "",
+		dSize:    "",
+		loadTime: "",
+		cDate:    "",
+	}
+
+	start := time.Now()
 	// Кодируем массив структур в формат JSON
-	getJsonData, err := getFilesInfo(root, sortValue)
+	jsonDataList, err := getFilesInfo(root, sortValue)
 	if err != nil {
 		log.Println("Не удалось получить директорию: ", root)
 		rw.Write([]byte("Не удалось получить директорию"))
 		return
 	}
 
-	jsonData, err := json.Marshal(getJsonData)
+	// Вычисляем статистику для БД
+	dirStat.loadTime = time.Since(start).String()
+	dirStat.root = root
+	dirStat.cDate = start.Format("2006.01.02 15:04:05")
+	total := 0
+	for _, file := range jsonDataList {
+		total += file.Size
+	}
+	dirStat.dSize = formSize(total)
+	postRequest(dirStat)
+
+	jsonData.Data, err = json.Marshal(jsonDataList)
 	if err != nil {
 		log.Println("Не удалось сериализировать данные")
-		rw.Write([]byte("Не удалось сериализировать данные"))
+		jsonData.ErrorText = "Не удалось сериализировать данные"
+		jsonData.Status = 1
+		jsonData.Data = nil
+		rw.Write([]byte(jsonData.ErrorText))
 		return
 	}
-	_, err = rw.Write(jsonData)
+
+	_, err = rw.Write(jsonData.Data)
 	if err != nil {
-		log.Println("Не удалось записать json данные")
-		rw.Write([]byte("Не удалось отобразить данные"))
+		jsonData.ErrorText = "Не удалось записать json данные"
+		jsonData.Status = 2
+		jsonData.Data = nil
+		rw.Write([]byte(jsonData.ErrorText))
 		return
 	}
 }
@@ -84,4 +112,25 @@ func handlerView(rw http.ResponseWriter, r *http.Request) {
 		log.Println("Не удалось сгенерировать html-разметку")
 		return
 	}
+}
+
+func postRequest(dirStat DirsStat) error {
+	bytesRep, err := json.Marshal(dirStat)
+	if err != nil {
+		log.Println("Не удалось сериализовать данные")
+		return err
+	}
+
+	req, err := http.NewRequest("POST", "http://localhost/set_stat.php", bytes.NewBuffer(bytesRep))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Не удалось отправить запрос")
+		return err
+	}
+	defer resp.Body.Close()
+	fmt.Println("Send")
+	return nil
 }
