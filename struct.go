@@ -7,10 +7,10 @@ import (
 
 // Структура для отправки статистики
 type DirsStat struct {
-	root     string
-	dSize    string
-	loadTime string
-	cDate    string
+	LeadTime float64 `json:"lead_time"`
+	DirSize  int     `json:"dir_size"`
+	CurDate  string  `json:"cur_date"`
+	Root     string  `json:"root"`
 }
 
 // Структура для получения Json данных

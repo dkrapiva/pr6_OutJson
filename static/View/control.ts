@@ -56,7 +56,7 @@ export class Control {
         });
 
         this.statBtn!.addEventListener("click", () => {
-            window.open("http://localhost/set_stat.php");
+            window.open("http://localhost:80/get_stat.php");
         })
 
     }   

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -51,10 +52,10 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 
 	// Инициализация структуры для статистики
 	var dirStat = DirsStat{
-		root:     "",
-		dSize:    "",
-		loadTime: "",
-		cDate:    "",
+		LeadTime: 0,
+		DirSize:  0,
+		CurDate:  "",
+		Root:     "",
 	}
 
 	start := time.Now()
@@ -67,14 +68,12 @@ func getJsonData(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Вычисляем статистику для БД
-	dirStat.loadTime = time.Since(start).String()
-	dirStat.root = root
-	dirStat.cDate = start.Format("2006.01.02 15:04:05")
-	total := 0
+	dirStat.LeadTime = time.Since(start).Seconds()
+	dirStat.Root = root
+	dirStat.CurDate = start.Format("2006.01.02 15:04:05")
 	for _, file := range jsonDataList {
-		total += file.Size
+		dirStat.DirSize += file.Size
 	}
-	dirStat.dSize = formSize(total)
 	postRequest(dirStat)
 
 	jsonData.Data, err = json.Marshal(jsonDataList)
@@ -120,17 +119,19 @@ func postRequest(dirStat DirsStat) error {
 		log.Println("Не удалось сериализовать данные")
 		return err
 	}
-
-	req, err := http.NewRequest("POST", "http://localhost/set_stat.php", bytes.NewBuffer(bytesRep))
+	req, err := http.NewRequest("POST", "http://localhost:80/set_stat.php", bytes.NewBuffer(bytesRep))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("Не удалось отправить запрос")
+		fmt.Println("Не удалось отправить запрос")
 		return err
 	}
 	defer resp.Body.Close()
-	fmt.Println("Send")
+
+	fmt.Println("Статус запроса: ", resp.Status)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("Ответ от php: ", string(body))
 	return nil
 }
