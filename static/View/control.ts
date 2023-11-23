@@ -13,11 +13,10 @@ export class Control {
     btnDESC = document.querySelector("#DESCbtn");
     btn = document.querySelector("#backbtn");
     statBtn = document.querySelector('#stat');
-    fileModel;
+    fileModel = new FileModel();
     table;
 
-    constructor (fileModel: FileModel, table: Table) {
-        this.fileModel = fileModel;
+    constructor (table: Table) {
         this.table = table;
     }
 

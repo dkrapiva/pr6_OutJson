@@ -1,4 +1,3 @@
-import { FileModel } from "./Model/file_model";
 import { Table } from "./View/table";
 import { Control } from "./View/control";
 
@@ -28,9 +27,8 @@ let rootObj = {
 
 document.addEventListener('DOMContentLoaded', () => {
     // Инициализация объектов классов
-    let fileModel = new FileModel();
-    let table = new Table(fileModel, sortValue, rootObj);
-    let control = new Control(fileModel, table); 
+    let table = new Table(sortValue, rootObj); 
+    let control = new Control(table);
     table.init(rootObj);
     control.init(rootObj, sortValue);
 });

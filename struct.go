@@ -35,19 +35,19 @@ type File struct {
 }
 
 // Структура для реализации мьютекса
-type MutexStruct struct {
+type MapFileInfo struct {
 	sync.Mutex
 	mapFileInfo map[fs.FileInfo]int
 }
 
-func (mu *MutexStruct) set(file fs.FileInfo, value int) {
+func (mu *MapFileInfo) set(file fs.FileInfo, value int) {
 	mu.Lock()
 	defer mu.Unlock()
 	mu.mapFileInfo[file] = value
 }
 
-func New() *MutexStruct {
-	return &MutexStruct{
+func New() *MapFileInfo {
+	return &MapFileInfo{
 		mapFileInfo: make(map[fs.FileInfo]int),
 	}
 }

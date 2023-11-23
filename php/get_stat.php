@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link href ="style.css" rel = "stylesheet"> 
+        <link href ="style.css" type="text/css" rel = "stylesheet"> 
         <meta charset ="utf-8">
+        <script src="script.js"></script>
     </head>
     <body>
-        <div class="container">
+        <div>
+            <button type = "button" id = "back_btn">Назад</button>
+        </div>
+        <div class="container" >
             <canvas class="chart"></canvas>
         </div>
         <table>
@@ -18,57 +22,43 @@
             </tr>
             <tbody>
                 <?php
-                    $servername = "localhost";
-                    $database = "statisticsdb";
-                    $username = "root";
-                    $password = "password";
-                    // Создаем соединение
-                    $conn = mysqli_connect($servername, $username, $password, $database);
-                    // Проверяем соединение
-                    if (!$conn) {
-                        die("Connection failed: " . mysqli_connect_error());
+                    require 'loading_data.php';
+                    $data = loadingData();
+                    for ($i = 0; $i < (count($data['root'])); $i++){
+                        echo "<tr>";
+                        echo "<td>" .$data["root"][$i]."</td>";
+                        echo "<td>" .$data["size"][$i]."</td>";
+                        echo "<td>" .$data["time"][$i]."</td>";
+                        echo "<td>" .$data["date"][$i]."</td>";
+                        echo "<tr>";
                     }
-                    $sql = "SELECT * FROM `timestat`";
-                    $result = $conn->query($sql); 
-                    while ($row = $result->fetch_assoc()):; 
-                        echo "<tr>";
-                        echo "<td>" .$row["root"]."</td>";
-                        echo "<td>" .$row["dir_size"]."</td>";
-                        echo "<td>" .$row["lead_time"]."</td>";
-                        echo "<td>" .$row["cur_date"]."</td>";
-                        echo "<tr>";
-                        $time[] = $row['lead_time']; 
-                        $size[] = $row['dir_size']; 
-                    endwhile;
-                    $graphdata = array("time" => $time, "size" => $size);
                 ?>
             </tbody>
         </table>
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-                var data = <?php echo json_encode($graphdata);?>;
+                let graph_data = <?php echo json_encode($data);?>;
+                let [size_array, time_array] = formData(graph_data.size, graph_data.time);
+                console.log(size_array, time_array);
                 new Chart(document.querySelector('.chart'), {
                     type: 'line',
-                    fontColor: '#000000',
+                    fontColor: '#ffffff',
                     data: {
-                        labels: data.size,
+                        labels: size_array,
                         datasets: [{ 
-                            data: data.time,
-                            label: "Время, мс",
-                            borderColor: "#3e95cd",
-                            fill: true
+                            data: time_array,
+                            label:  "Зависимость времени расчета размера директории от размера директории",
+                            borderColor: "#20B2AA",
                         }
-                        ]
+                        ],
                     },
-                    options: {
-                        title: {
-                        display: true,
-                        text: 'Зависимость размера директории от времени расчета ее размера'
-                        }
-                    }
                 }); 
+                let back_btn = document.getElementById('back_btn');
+                back_btn.addEventListener("click", () => {
+                    window.location.replace("http://localhost:8181/");
+                });
             });
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </body>
 </html>

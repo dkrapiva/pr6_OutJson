@@ -1,38 +1,39 @@
 <?php
-$servername = "localhost";
-$database = "statisticsdb";
-$username = "root";
-$password = "password";
-// Создаем соединение
-$conn = mysqli_connect($servername, $username, $password, $database);
-// Проверяем соединение
-if (!$conn) {
-    die("Соединение не установлено");
-}
-echo "Соединение установлено\n";
+require 'connection.php';
+require 'connection_data.php';
+use data as d;
+// Устанавливаем соединение с БД
+$conn = connectionDB(d\DataConnection::$servername, d\DataConnection::$username, d\DataConnection::$password, d\DataConnection::$database);
 
+// Парсим полученные данные
+try {
 $jsondata = file_get_contents("php://input");
-if (!empty($jsondata)) {
-    echo "Данные получены\n: ";
-    echo var_dump($jsondata);
-} else {
-    echo "Данные не получены\n";
-}
+} catch (Exception $e) {
+    echo 'Выброшено исключение: ',  $e->getMessage(), "\n";
+} 
 
-$data = json_decode($jsondata, true);
+try{
+    $data = json_decode($jsondata, true);
+} catch(Exception $e) {
+    echo 'Выброшено исключение: ',  $e->getMessage(), "\n";
+}
 
 $root = $data['root'];
 $dir_size = $data['dir_size'];
 $cur_date = $data['cur_date'];
 $lead_time = $data['lead_time'];
 
-
+try {
 $prep = $conn->prepare("INSERT INTO `timestat`(root, dir_size, cur_date, lead_time) VALUES (?, ?, ?, ?)");
-if(!$prep) {
-    echo "Не удалось подготовить запрос на запись";
+} catch (Exception $e) {
+    echo 'Выброшено исключение: ',  $e->getMessage(), "\n";
 }
+
+try {
 $prep->execute([$root, $dir_size, $cur_date, $lead_time]);
+} catch(Exception $e) {
+    echo 'Выброшено исключение: ',  $e->getMessage(), "\n";
+}
 
 mysqli_close($conn);
 ?>
-

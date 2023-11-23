@@ -21,3 +21,21 @@ table td{
     border: none;
     border-bottom: 5px solid #F2F8F8;
 }
+
+div.container{
+    width: 1000px;
+    height: 600px;
+}
+
+#back_btn {
+    background: rgb(133, 201, 247);
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    display: inline-block;
+    font-size: 22px;
+    margin: 4px 2px;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+}

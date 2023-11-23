@@ -25,7 +25,7 @@ export class FileModel{
         }
 
         xhr.onload = () => {
-            callback(xhr, rootObj, sortValue);
+            callback(xhr); 
         }
         xhr.send();
     }

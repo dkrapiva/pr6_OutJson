@@ -9,13 +9,11 @@ type File = {
 type FileListResponse = File[];
 
 export class Table{
-    // render(): создание и заполнение таблицы данных из директорий 
     tbody = document.querySelector('#tbody_id');
     rootObj;
-    fileModel;
+    fileModel = new FileModel();
     sortValue;
     constructor (
-        fileModel: FileModel, 
         sortValue: string, 
         rootObj: {
             root: string, 
@@ -23,11 +21,11 @@ export class Table{
             removeFolder: Function
         }, 
     ){ 
-        this.fileModel = fileModel;
         this.sortValue = sortValue;
         this.rootObj = rootObj;
     }
-
+    
+    // render(): создание и заполнение таблицы данных из директорий 
     render(responseObj: FileListResponse) { 
 
         for (let item of responseObj){

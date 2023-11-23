@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -11,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"gopkg.in/ini.v1"
 )
 
 func main() {
@@ -113,13 +116,37 @@ func handlerView(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Чтение из конфигурационного файла
+func readConfig() (string, string, error) {
+	inidata, err := ini.Load("uconfig.ini")
+	if err != nil {
+		log.Println("Не удалось прочитать файл")
+		return "", "", err
+	}
+	section := inidata.Section("database")
+	return section.Key("host").String(), section.Key("port").String(), nil
+}
+
+//postRequest(): отправляет post запрос на apache сервер
 func postRequest(dirStat DirsStat) error {
 	bytesRep, err := json.Marshal(dirStat)
 	if err != nil {
 		log.Println("Не удалось сериализовать данные")
 		return err
 	}
-	req, err := http.NewRequest("POST", "http://localhost:80/set_stat.php", bytes.NewBuffer(bytesRep))
+
+	host, port, err := readConfig()
+	if err != nil {
+		log.Println("Не удалось получить url сервера")
+		return err
+	}
+	if (host == "") || (port == "") {
+		var err = errors.New("Задан некорректный параметр сортировки")
+		return err
+	}
+
+	url := fmt.Sprintf("http://%s:%s/set_stat.php", host, port)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bytesRep))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
